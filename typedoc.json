@@ -1,0 +1,9 @@
+{
+  "name": "Molecule App",
+  "entryPoints": [
+    "src/index.tsx"
+  ],
+  "includes": [
+    "tutorials"
+  ]
+}
