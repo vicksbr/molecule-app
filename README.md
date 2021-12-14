@@ -43,7 +43,18 @@
 
 # About
 
-This app provides core functionality necessary for most resource-oriented, data-driven applications.
+This API provides core functionality necessary for most resource-oriented, data-driven applications. It is what you would get if you selected the following for your Molecule:
+
+- Language: TypeScript
+- Package manager: NPM
+- Renderer: React
+- Documentation: TypeDoc
+- Testing: Jest
+- Logging: Loglevel
+- Platforms: Web
+- UI: Styled components
+- Themes: Light, Dark
+- Deployment: Netlify
 
 To add the functionality you need for your own applications, visit [Molecule.dev](https://www.molecule.dev) and create your own Molecule. You'll receive a codebase similar to this one with all of the additional functionality you've selected, customized specifically for you.
 
@@ -608,13 +619,3 @@ To add your subdomain to Netlify's DNS:
 
 > Note: You may need to update both your app's and API's environment variables to match your domain if it's different than what you originally set. On the API side (in Heroku), you'll want to ensure the `API_ORIGIN` is correct. On the app side (in Netlify), you'll want to ensure the `REACT_APP_API_ORIGIN` is correct.
 
-
-<style>
-h1, h2, h3 {
-  line-height: 1.2;
-}
-.tsd-typography > *:not(a[href^='#']) + a[href^='#'] {
-  display: block;
-  margin-top: 100px;
-}
-</style>
