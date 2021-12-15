@@ -29,8 +29,7 @@ export type AsyncExtendState<State> = (extendState: SetStateAction<Partial<State
  * // This also works.
  * const fetchState = async (): Promise<State> => {
  *   const response = await API.client.get('data')
- *   const { foo, bar } = response.data as State
- *   const nextState = { foo, bar }
+ *   const nextState = response.data as State
  * 
  *   return nextState
  * 
@@ -64,43 +63,52 @@ export type AsyncExtendState<State> = (extendState: SetStateAction<Partial<State
  * extendState(fetchPartialState())
  * ```
  */
-export const useAsyncExtendedState = <State>(initialState: State | null): [ State | null, AsyncSetState<State | null>, AsyncExtendState<State | null> ] => {
-  const [ state, setState ] = useState<State | null>(initialState)
+export const useAsyncExtendedState = <State>(initialState: State): [ State, AsyncSetState<State>, AsyncExtendState<State> ] => {
+  const [ state, setState ] = useState<State>(initialState)
 
-  const asyncSetState: AsyncSetState<State | null> = useMemo(() => async nextState => {
+  const asyncSetState: AsyncSetState<State> = useMemo(() => async nextState => {
+    const initialNextState = nextState
+
     try {
       if (nextState instanceof Promise) {
         nextState = await nextState
+
+        if (nextState === initialNextState) { // there was an error but it was caught by something else - i.e., nextState.catch()
+          throw new Error(`Uncatchable error.`)
+        }
       }
 
       setState(state => {
         if (typeof nextState === `function`) {
-          nextState = (nextState as ((state: State | null) => State | null))(state)
+          nextState = (nextState as ((state: State) => State))(state)
         }
 
-        return nextState as State | null
+        return nextState as State
       })
     } catch (error) {
-      setState(null)
     }
   }, [])
 
-  const asyncExtendState: AsyncExtendState<State | null> = useMemo(() => async extendState => {
+  const asyncExtendState: AsyncExtendState<State> = useMemo(() => async extendState => {
+    const initialExtendState = extendState
+
     try {
       if (extendState instanceof Promise) {
         extendState = await extendState
-      }
-    } catch (error) {
-    }
 
-    if (extendState) {
+        if (extendState === initialExtendState) { // there was an error but it was caught by something else - i.e., extendState.catch()
+          throw new Error(`Uncatchable error.`)
+        }
+      }
+
       setState(state => {
         if (typeof extendState === `function`) {
-          extendState = (extendState as ((state: State | null) => Partial<State> | null))(state)
+          extendState = (extendState as ((state: State) => Partial<State>))(state)
         }
 
-        return state && ({ ...state, ...extendState }) as State | null
+        return { ...state, ...extendState } as State
       })
+    } catch (err) {
     }
   }, [])
 

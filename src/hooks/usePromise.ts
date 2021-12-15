@@ -38,11 +38,13 @@ export type StateWithReset<T> = PromiseState<T> & { reset: ResetPromiseState }
  *   bar: 'bar'
  * })
  * 
- * const [ dataRequest, requestData ] = usePromise((id: string) => API.client.get(`data/${id}`).then(response => {
+ * const read = (id: string) => API.client.get(`data/${id}`).then(response => {
  *   return response.data as Partial<State>
- * }))
+ * })
  * 
- * const isPending = dataRequest.status === 'pending'
+ * const [ readRequest, requestRead ] = usePromise(read)
+ * 
+ * const isPending = readRequest.status === 'pending'
  * 
  * return (
  *   <>
@@ -54,7 +56,7 @@ export type StateWithReset<T> = PromiseState<T> & { reset: ResetPromiseState }
  *       bar: {state.bar}
  *     </div>
  * 
- *     <UI.Button onClick={() => extendState(requestData('someId'))} disabled={isPending}>
+ *     <UI.Button onClick={() => extendState(requestRead('someId'))} disabled={isPending}>
  *       <span>
  *         {isPending
  *           ? 'Requesting data...'
@@ -64,7 +66,7 @@ export type StateWithReset<T> = PromiseState<T> & { reset: ResetPromiseState }
  *     </UI.Button>
  * 
  *     <UI.Error>
- *       {dataRequest.error}
+ *       {readRequest.error}
  *     </UI.Error>
  *   </>
  * )
@@ -88,18 +90,22 @@ export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T):
     isCancelled.current = false
 
     if (promise instanceof Promise) {
-      promise.then((value: Awaited<ReturnType<T>>) => {
-        if (!isCancelled.current && !isUnmounted.current) {
-          setState({ status: `resolved`, value })
+      const fulfillPromise = async () => {
+        try {
+          const value: Awaited<ReturnType<T>> = await promise
+
+          if (!isCancelled.current && !isUnmounted.current) {
+            setState({ status: `resolved`, value })
+          }
+        } catch (error) {
+          if (!isCancelled.current && !isUnmounted.current) {
+            setState(({ value }) => ({ status: `rejected`, value, error: error instanceof Error ? error : new Error(error as string) }))
+          }
         }
-        return value
-      }).catch((error: Error) => {
-        if (!isCancelled.current && !isUnmounted.current) {
-          setState(({ value }) => ({ status: `rejected`, value, error: error instanceof Error ? error : new Error(error) }))
-        }
-      })
+      }
 
       setState(({ value }) => ({ status: `pending`, value, promise, cancel }))
+      fulfillPromise()
     } else {
       setState({ status: `resolved`, value: promise })
     }

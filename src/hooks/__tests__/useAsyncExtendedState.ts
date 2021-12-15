@@ -50,15 +50,26 @@ it(`sets and extends the state, synchronously and asynchronously with error hand
   })
 
   // set the state asynchronously, throwing an error
+  let rejectedAsyncSetState = false
   act(() => {
-    setState(new Promise((resolve, reject) => setTimeout(() => reject(new Error(`Rejected.`)), REJECT_TIME)))
+    setState(new Promise((resolve, reject) => setTimeout(() => {
+      reject(new Error(`Rejected.`))
+      rejectedAsyncSetState = true
+    }, REJECT_TIME)))
   })
 
-  await waitForNextUpdate()
+  // no update should occur since there was an error, wait until rejected
+  await new Promise(resolve => setTimeout(resolve, REJECT_TIME + 10))
 
-  // confirm the state was set to null due to the error
+  // confirm async setState was rejected
+  expect(rejectedAsyncSetState).toBe(true)
+
+  // confirm the state was unchanged due to the error
   state = result.current[0]
-  expect(state).toBe(null)
+  expect(state).toMatchObject({
+    foo: `HELLO`,
+    bar: `WORLD!`
+  })
 
   // set the state asynchronously
   act(() => {
@@ -119,11 +130,19 @@ it(`sets and extends the state, synchronously and asynchronously with error hand
   })
 
   // extend the state asynchronously, throwing an error
+  let rejectedAsyncExtendState = false
   act(() => {
-    extendState(new Promise((resolve, reject) => setTimeout(() => reject(new Error(`Rejected.`)), REJECT_TIME)))
+    extendState(new Promise((resolve, reject) => setTimeout(() => {
+      reject(new Error(`Rejected.`))
+      rejectedAsyncExtendState = true
+    }, REJECT_TIME)))
   })
 
-  await waitForNextUpdate()
+  // no update should occur since there was an error, wait until rejected
+  await new Promise(resolve => setTimeout(resolve, REJECT_TIME + 10))
+
+  // confirm async extendState was rejected
+  expect(rejectedAsyncExtendState).toBe(true)
 
   // confirm the state was left unchanged due to the error
   state = result.current[0]
