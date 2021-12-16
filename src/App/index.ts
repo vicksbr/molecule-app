@@ -8,7 +8,9 @@
  * @module
  */
 
+export * as Layouts from './Layouts'
 export * as Store from './Store'
+export * as Thing from './Thing'
 
 export { About } from './About'
 export type { AboutProps } from './About'
