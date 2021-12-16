@@ -45,16 +45,16 @@
 
 This API provides core functionality necessary for most resource-oriented, data-driven applications. It is what you would get if you selected the following for your Molecule:
 
-- Language: TypeScript
-- Package manager: NPM
-- Renderer: React
-- Documentation: TypeDoc
-- Testing: Jest
-- Logging: Loglevel
-- Platforms: Web
-- UI: Styled components
-- Themes: Light, Dark
-- Deployment: Netlify
+- Language - TypeScript
+- Package manager - NPM
+- Renderer - React
+- Documentation - TypeDoc
+- Testing - Jest
+- Logging - Loglevel
+- Platforms - Web
+- UI - Styled components
+- Themes - Light, Dark
+- Deployment - Netlify
 
 To add the functionality you need for your own applications, visit [Molecule.dev](https://www.molecule.dev) and create your own Molecule. You'll receive a codebase similar to this one with all of the additional functionality you've selected, customized specifically for you.
 
