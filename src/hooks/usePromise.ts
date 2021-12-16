@@ -2,10 +2,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 
 export type PromiseStatus = `pending` | `resolved` | `rejected`
-export type CancelPromise = () => void
-
-export type PromiseStateKeys = `status` | `promise` | `value` | `error` | `cancel`
-export type ResetPromiseState = (keys?: PromiseStateKeys[]) => void
+export type CancelPromise = (message?: string) => void
+export type ResetPromiseState<T> = (keys?: Array<keyof PromiseState<T>>) => void
 
 export interface PromiseState<T> {
   status?: PromiseStatus
@@ -15,7 +13,9 @@ export interface PromiseState<T> {
   cancel?: CancelPromise
 }
 
-export type StateWithReset<T> = PromiseState<T> & { reset: ResetPromiseState }
+export type PromiseStateWithReset<T> = PromiseState<T> & {
+  reset: ResetPromiseState<T>
+}
 
 /**
  * A hook which accepts an asynchronous function (i.e., a function which returns a promise).
@@ -72,14 +72,14 @@ export type StateWithReset<T> = PromiseState<T> & { reset: ResetPromiseState }
  * )
  * ```
  */
-export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T): [ StateWithReset<ReturnType<T>>, (...asyncFuncArgs: Parameters<T>) => ReturnType<T> ] => {
-  const [ state, setState ] = useState<PromiseState<ReturnType<T>>>({})
+export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T, initialState?: PromiseState<ReturnType<T>>): [ PromiseStateWithReset<ReturnType<T>>, (...asyncFuncArgs: Parameters<T>) => ReturnType<T> ] => {
+  const [ state, setState ] = useState<PromiseState<ReturnType<T>>>(initialState || {})
   const isCancelled = useRef(false)
   const isUnmounted = useRef(false)
 
-  const callAsyncFunction = useMemo(<T extends (...args: any[]) => any>() => (...args: Parameters<T>): ReturnType<T> => {
+  const callAsyncFunction = useMemo(() => (...args: Parameters<T>): ReturnType<T> => {
     const promise = asyncFunction(...args)
-    const cancel: CancelPromise = (message = `Cancelled.`) => {
+    const cancel: CancelPromise = message => {
       isCancelled.current = true
 
       if (!isUnmounted.current) {
@@ -90,30 +90,32 @@ export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T):
     isCancelled.current = false
 
     if (promise instanceof Promise) {
-      const fulfillPromise = async () => {
-        try {
-          const value: Awaited<ReturnType<T>> = await promise
+      return new Promise(resolve => {
+        const fulfillPromise = async () => {
+          try {
+            const value: Awaited<ReturnType<T>> = await promise
 
-          if (!isCancelled.current && !isUnmounted.current) {
-            setState({ status: `resolved`, value })
-          }
-        } catch (error) {
-          if (!isCancelled.current && !isUnmounted.current) {
-            setState(({ value }) => ({ status: `rejected`, value, error: error instanceof Error ? error : new Error(error as string) }))
+            if (!isCancelled.current && !isUnmounted.current) {
+              setState({ status: `resolved`, value })
+              resolve(value)
+            }
+          } catch (error) {
+            if (!isCancelled.current && !isUnmounted.current) {
+              setState(({ value }) => ({ status: `rejected`, value, error: error instanceof Error ? error : new Error(error as string) }))
+            }
           }
         }
-      }
 
-      setState(({ value }) => ({ status: `pending`, value, promise, cancel }))
-      fulfillPromise()
+        setState(({ value }) => ({ status: `pending`, value, promise, cancel }))
+        fulfillPromise()
+      }) as ReturnType<T>
     } else {
       setState({ status: `resolved`, value: promise })
+      return promise
     }
-
-    return promise
   }, [ asyncFunction ])
 
-  const reset: ResetPromiseState = useMemo(() => keys => setState(state => {
+  const reset: ResetPromiseState<T> = useMemo(() => keys => setState(state => {
     if (!keys) {
       return {}
     }
@@ -129,7 +131,7 @@ export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T):
     return nextState
   }), [])
 
-  const stateWithReset: StateWithReset<ReturnType<T>> = useMemo(() => ({ ...state, reset }), [ state, reset ])
+  const stateWithReset: PromiseStateWithReset<ReturnType<T>> = useMemo(() => ({ ...state, reset }), [ state, reset ])
 
   useEffect(() => {
     return () => {

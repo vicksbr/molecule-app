@@ -111,7 +111,7 @@ it(`provides the state, resolved value, and rejected error of some promise with 
   await new Promise<void>(resolve => {
     setTimeout(() => {
       act(() => {
-        state.cancel?.()
+        state.cancel?.(`Cancelled.`)
       })
 
       resolve()
@@ -164,4 +164,36 @@ it(`provides the state, resolved value, and rejected error of some promise with 
   expect(state.error).toBeUndefined()
   expect(state.cancel).toBeUndefined()
   expect(state.reset).toBeInstanceOf(Function)
+})
+
+it(`initializes the state with a predefined status and value`, async () => {
+  const { result, waitForNextUpdate } = renderHook(() => usePromise((errorMessage?: string) => new Promise<State>((resolve, reject) => {
+    setTimeout(() => {
+      if (errorMessage) {
+        reject(new Error(errorMessage))
+      } else {
+        resolve({
+          foo: `Hello`,
+          bar: `World!`
+        })
+      }
+    }, REJECT_TIME)
+  }), {
+    status: `resolved`,
+    value: {
+      foo: `foo`,
+      bar: `bar`
+    }
+  }))
+
+  const state = result.current[0]
+
+  // confirm initial state
+  expect(state).toMatchObject({
+    status: `resolved`,
+    value: {
+      foo: `foo`,
+      bar: `bar`
+    }
+  })
 })
