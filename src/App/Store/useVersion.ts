@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from 'react'
 import axios from 'axios'
-import { useExtendedState } from '../../hooks/useExtendedState'
+import { useAsyncExtendedState } from '../../hooks/useAsyncExtendedState'
 import { register, unregister } from '../../serviceWorkerRegistration'
 import { logger } from '../../logger'
 
@@ -84,7 +84,7 @@ let skipWaitingOnUpdate = false
  * Polls `version.json` every 15 minutes.
  */
 export const useVersion = (): [ VersionState, VersionActions ] => {
-  const [ versionState,, extendVersionState ] = useExtendedState<VersionState>({
+  const [ versionState,, extendVersionState ] = useAsyncExtendedState<VersionState>({
     buildId: ``,
     version: process.env.REACT_APP_VERSION || ``,
     newBuildId: ``,

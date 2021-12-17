@@ -165,6 +165,8 @@ To add the functionality you need for your own applications, visit [Molecule.dev
   - Tests
 
 - Extremely useful React hooks
+  - `useAsyncExtendedState` - Same as `setState` but with an additional convenient `extendState` function and the ability to accept promises
+    - State can be updated asynchronously, when the promise resolves or rejects
   - `usePromise` - Manage and render the state of any `Promise`
     - `status` - Pending, resolved, or rejected
     - `promise` - The `Promise` instance itself
@@ -172,9 +174,6 @@ To add the functionality you need for your own applications, visit [Molecule.dev
     - `error` - The caught error
     - `cancel` - Cancels the promise
     - `reset` - Resets the state
-  - `useExtendedState` - Same as `setState` but with an additional convenient `extendState` function
-  - `useAsyncExtendedState` - Same as `useExtendedState` but with the convenient ability to accept promises
-    - State can be updated asynchronously, when the promise resolves or rejects
   - Tests
 
 - Utilities

@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import * as UI from '../../UI'
-import { useExtendedState, usePromise } from '../../hooks'
+import { useAsyncExtendedState, usePromise } from '../../hooks'
 import { create as createThing } from '../../API/resource/thing'
 import { types } from '../../API/resource/thing'
 import { Store } from '../Store/types'
@@ -16,7 +16,7 @@ export type CreatorProps = React.HTMLProps<HTMLDivElement> & {
  * Update thing properties or delete the thing.
  */
 export const Creator = styled(({ store, autoFocus = true, onCreated, ...props }: CreatorProps) => {
-  const [ state, setState, extendState ] = useExtendedState<types.CreateProps>({
+  const [ state, setState, extendState ] = useAsyncExtendedState<types.CreateProps>({
     description: ``
   })
 
