@@ -27,17 +27,13 @@ export type AsyncExtendState<State> = (extendState: SetStateAction<Partial<State
  * setState(state => ({ foo: 'Hello', bar: 'World!' }))
  * 
  * // This also works.
- * const fetchState = async (): Promise<State> => {
- *   const response = await API.client.get('data')
- *   const nextState = response.data as State
- * 
- *   return nextState
+ * const fetchState = () => API.client.get<State>('data').then(response => {
+ *   return response.data
  * 
  *   // or return (state: State) => {
- *     // logger.info({ state, nextState })
- *     // return nextState
+ *     // return response.data
  *   // }
- * }
+ * })
  * 
  * // The state will eventually be set to the asynchronously resolved value.
  * setState(fetchState())
@@ -47,17 +43,13 @@ export type AsyncExtendState<State> = (extendState: SetStateAction<Partial<State
  * extendState(state => ({ bar: 'World!' }))
  * 
  * // Or extend the state asynchronously.
- * const fetchPartialState = async (): Promise<Partial<State>> => {
- *   const response = await API.client.get('data')
- *   const partialState = response.data as Partial<State>
- * 
- *   return partialState
+ * const fetchPartialState = () => API.client.get<Partial<State>>('data').then(response => {
+ *   return response.data
  * 
  *   // or return (state: State) => {
- *     // logger.info({ state, partialState })
- *     // return partialState
+ *     // return response.data
  *   // }
- * }
+ * })
  * 
  * // The state will eventually be extended by the asynchronously resolved value.
  * extendState(fetchPartialState())
