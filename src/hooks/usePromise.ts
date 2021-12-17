@@ -38,13 +38,13 @@ export type PromiseStateWithReset<T> = PromiseState<T> & {
  *   bar: 'bar'
  * })
  * 
- * const read = (id: string) => API.client.get(`data/${id}`).then(response => {
- *   return response.data as Partial<State>
+ * const read = (id: string) => API.client.get<Partial<State>>(`things/${id}`).then(response => {
+ *   return response.data
  * })
  * 
- * const [ readRequest, requestRead ] = usePromise(read)
+ * const [ readThingRequest, readThing ] = usePromise(read)
  * 
- * const isPending = readRequest.status === 'pending'
+ * const isPending = readThingRequest.status === 'pending'
  * 
  * return (
  *   <>
@@ -56,17 +56,17 @@ export type PromiseStateWithReset<T> = PromiseState<T> & {
  *       bar: {state.bar}
  *     </div>
  * 
- *     <UI.Button onClick={() => extendState(requestRead('someId'))} disabled={isPending}>
+ *     <UI.Button onClick={() => extendState(readThing('someId'))} disabled={isPending}>
  *       <span>
  *         {isPending
- *           ? 'Requesting data...'
- *           : 'Request data'
+ *           ? 'Reading thing...'
+ *           : 'Read thing'
  *         }
  *       </span>
  *     </UI.Button>
  * 
  *     <UI.Error>
- *       {readRequest.error}
+ *       {readThingRequest.error}
  *     </UI.Error>
  *   </>
  * )
