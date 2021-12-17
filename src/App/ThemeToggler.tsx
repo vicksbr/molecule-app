@@ -26,16 +26,14 @@ export const ThemeToggler = styled(({ store, ...props }: ThemeTogglerProps) => (
         <SunIcon size={20} aria-label='Theme: Light' />
       </UI.Button>
     ) : (
-      <div { ...props }>
-        <UI.Button
-          color='grayText'
-          backgroundColor='transparent'
-          title='Theme: Dark'
-          onClick={() => store.setThemeKey(`light`)}
-        >
-          <MoonIcon size={20} aria-label='Theme: Dark' />
-        </UI.Button>
-      </div>
+      <UI.Button
+        color='grayText'
+        backgroundColor='transparent'
+        title='Theme: Dark'
+        onClick={() => store.setThemeKey(`light`)}
+      >
+        <MoonIcon size={20} aria-label='Theme: Dark' />
+      </UI.Button>
     )}
   </div>
 ))`
