@@ -2,7 +2,7 @@ import { useState, useMemo, SetStateAction } from 'react'
 
 export type AsyncSetState<State> = (nextState: SetStateAction<State> | Promise<SetStateAction<State>>) => void
 
-export type AsyncExtendState<State> = (extendState: SetStateAction<Partial<State>> | Promise<SetStateAction<Partial<State>>>) => void
+export type AsyncExtendState<State> = (partialState: SetStateAction<Partial<State>> | Promise<SetStateAction<Partial<State>>>) => void
 
 /**
  * A hook similar to React's `useState` which allows you to also pass promises which resolve to the next state.
@@ -81,24 +81,24 @@ export const useAsyncExtendedState = <State>(initialState: State): [ State, Asyn
     }
   }, [])
 
-  const asyncExtendState: AsyncExtendState<State> = useMemo(() => async extendState => {
-    const initialExtendState = extendState
+  const asyncExtendState: AsyncExtendState<State> = useMemo(() => async partialState => {
+    const initialPartialState = partialState
 
     try {
-      if (extendState instanceof Promise) {
-        extendState = await extendState
+      if (partialState instanceof Promise) {
+        partialState = await partialState
 
-        if (extendState === initialExtendState) { // there was an error but it was caught by something else - i.e., extendState.catch()
+        if (partialState === initialPartialState) { // there was an error but it was caught by something else - i.e., partialState.catch()
           throw new Error(`Uncatchable error.`)
         }
       }
 
       setState(state => {
-        if (typeof extendState === `function`) {
-          extendState = (extendState as ((state: State) => Partial<State>))(state)
+        if (typeof partialState === `function`) {
+          partialState = (partialState as ((state: State) => Partial<State>))(state)
         }
 
-        return { ...state, ...extendState } as State
+        return { ...state, ...partialState } as State
       })
     } catch (err) {
     }
