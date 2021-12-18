@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 
 export type PromiseStatus = `pending` | `resolved` | `rejected`
 export type CancelPromise = (message?: string) => void
-export type ResetPromiseState<T> = (keys?: Array<keyof PromiseState<T>>) => void
+export type ResetPromiseState<T> = (keys?: keyof PromiseState<T> | Array<keyof PromiseState<T>>) => void
 
 export interface PromiseState<T> {
   status?: PromiseStatus
@@ -122,10 +122,12 @@ export const usePromise = <T extends (...args: any[]) => any>(asyncFunction: T, 
 
     const nextState = { ...state }
 
-    if (keys) {
+    if (Array.isArray(keys)) {
       for (const key of keys) {
         delete nextState[key]
       }
+    } else {
+      delete nextState[keys]
     }
 
     return nextState

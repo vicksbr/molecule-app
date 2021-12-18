@@ -134,14 +134,31 @@ it(`provides the state, resolved value, and rejected error of some promise with 
   expect(state.cancel).toBeUndefined()
   expect(state.reset).toBeInstanceOf(Function)
 
-  // reset the error state
+  // reset the error state using a single key
   act(() => {
-    state.reset([`error`])
+    state.reset(`error`)
   })
 
-  // confirm reset state
+  // confirm error was reset
   state = result.current[0]
   expect(state.status).toBe(`rejected`)
+  expect(state.promise).toBeUndefined()
+  expect(state.value).toMatchObject({
+    foo: `Hello`,
+    bar: `World!`
+  })
+  expect(state.error).toBeUndefined()
+  expect(state.cancel).toBeUndefined()
+  expect(state.reset).toBeInstanceOf(Function)
+
+  // reset the status state using an array
+  act(() => {
+    state.reset([`status`])
+  })
+
+  // confirm status was reset
+  state = result.current[0]
+  expect(state.status).toBeUndefined()
   expect(state.promise).toBeUndefined()
   expect(state.value).toMatchObject({
     foo: `Hello`,
@@ -156,7 +173,7 @@ it(`provides the state, resolved value, and rejected error of some promise with 
     state.reset()
   })
 
-  // confirm reset state
+  // confirm the entire state was reset
   state = result.current[0]
   expect(state.status).toBeUndefined()
   expect(state.promise).toBeUndefined()
